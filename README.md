@@ -1,5 +1,7 @@
 # Honeylixir
 
+[![Build Status](https://travis-ci.org/lirossarvet/honeylixir.svg?branch=main)](https://travis-ci.org/lirossarvet/honeylixir)
+
 **TODO: Add description**
 
 ## Installation
@@ -18,4 +20,3 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/honeylixir](https://hexdocs.pm/honeylixir).
-
