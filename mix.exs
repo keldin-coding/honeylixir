@@ -7,7 +7,11 @@ defmodule Honeylixir.MixProject do
       version: "0.1.0",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      source_url: "https://github.com/lirossarvet/honeylixir",
+      description: description(),
+      elixirc_paths: compiler_paths(Mix.env()),
+      package: package()
     ]
   end
 
@@ -19,6 +23,17 @@ defmodule Honeylixir.MixProject do
       env: []
     ]
   end
+
+  defp package do
+    [
+      name: "honeylixir",
+      licenses: ["MIT"],
+      links: %{"Github" => "https://github.com/lirossarvet/honeylixir"}
+    ]
+  end
+
+  defp compiler_paths(:test), do: ["test/support"] ++ compiler_paths(:prod)
+  defp compiler_paths(_), do: ["lib"]
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
@@ -32,5 +47,9 @@ defmodule Honeylixir.MixProject do
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
+  end
+
+  defp description do
+    "Library for interacting with the Honeycomb API"
   end
 end
