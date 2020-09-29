@@ -4,13 +4,20 @@ defmodule Honeylixir.MixProject do
   def project do
     [
       app: :honeylixir,
-      version: "0.1.0",
+      version: "0.2.0",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+
+      # Docs
       source_url: "https://github.com/lirossarvet/honeylixir",
       description: description(),
       elixirc_paths: compiler_paths(Mix.env()),
+      docs: [
+        main: Honeylixir
+      ],
+
+      # Package
       package: package()
     ]
   end
@@ -19,7 +26,7 @@ defmodule Honeylixir.MixProject do
   def application do
     [
       mod: {Honeylixir, []},
-      extra_applications: [:logger],
+      extra_applications: [],
       env: []
     ]
   end

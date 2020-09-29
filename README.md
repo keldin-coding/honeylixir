@@ -2,17 +2,16 @@
 
 [![Build Status](https://travis-ci.org/lirossarvet/honeylixir.svg?branch=main)](https://travis-ci.org/lirossarvet/honeylixir)
 
-**TODO: Add description**
+This is intended to be a client for usage in hitting the [Honeycomb.io](https://www.honeycomb.io) APIs for sending events geared toward observability.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `honeylixir` to your list of dependencies in `mix.exs`:
+Available via HEx, the package can be installed by adding `honeylixir` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:honeylixir, "~> 0.1.0"}
+    {:honeylixir, "~> 0.2.0"}
   ]
 end
 ```
@@ -20,3 +19,7 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/honeylixir](https://hexdocs.pm/honeylixir).
+
+## Usage
+
+Please visit the [Hexdocs site](https://hexdocs.pm/honeylixir) for the latest documentation around usage and configuration.
