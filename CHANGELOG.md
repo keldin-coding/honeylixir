@@ -1,4 +1,4 @@
-# 0.4.0 (in progress)
+# 0.4.0
 
 * Cleaned up mix.exs file [#2](https://github.com/lirossarvet/honeylixir/pull/2)
 * **BREAKING** Removed the `ResponseQueue` in favor of `:telemetry` execution

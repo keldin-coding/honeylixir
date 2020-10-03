@@ -10,7 +10,7 @@ defmodule Honeylixir do
   ```
   def deps() do
     [
-      {:honeylixir, "~> 0.3.0"}
+      {:honeylixir, "~> 0.4.0"}
     ]
   end
   ```
