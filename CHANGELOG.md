@@ -3,6 +3,7 @@
 * Cleaned up mix.exs file [#2](https://github.com/lirossarvet/honeylixir/pull/2)
 * **BREAKING** Removed the `ResponseQueue` in favor of `:telemetry` execution
 * Notably adjust `duration` as determined in the `Honeylixir.Response` object to be a floating point number of milliseconds, such that something taking 100 microseconds is represented roughly as 0.1.
+* Add support for Global field configuration
 
 # 0.3.0
 

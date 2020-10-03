@@ -66,6 +66,26 @@ defmodule Honeylixir do
   Any value can be used but fields are **REQUIRED** to be strings. Non-string fields
   will result in a no matching function clause error.
 
+  ### Global field configuration
+
+  `Honeylixir` supports adding global fields which will be added to all events on
+  event creation. You can add, remove, or view the fields configured at any time.
+
+  ```
+  Honeylixir.GlobalFields.add_field("my-thing", "special")
+
+  event = Honeylixir.Event.create()
+  IO.inspect(event.fields)
+  # => %{"my-thing" => "special"}
+
+  IO.inspect Honeylixir.GlobalFields.fields
+  # => %{"my-thing", "special"}
+
+  Honeylixir.GlobalFields.remove_field("my-thing")
+  IO.inspect Honeylixir.GlobalFields.fields
+  # => %{}
+  ```
+
   ### Checking responses
 
   By attaching metadata to your events, you can pull `Honeylixir.Response`s to see what happened
@@ -99,6 +119,7 @@ defmodule Honeylixir do
 
   defp children do
     [
+      Honeylixir.GlobalFields,
       {Honeylixir.TransmissionQueue,
        %{
          max_queue_size: Application.get_env(:honeylixir, :max_queue_size, 10_000),
@@ -127,5 +148,9 @@ defmodule Honeylixir do
     :crypto.strong_rand_bytes(8) |> Base.encode16(case: :lower)
   end
 
+  @doc """
+  Key used for all event send telemetry executions.
+  """
+  @spec event_send_telemetry_key() :: list()
   def event_send_telemetry_key, do: [:honeylixir, :event, :send]
 end

@@ -20,6 +20,13 @@ defmodule HoneylixirEventTest do
     refute Map.has_key?(event.fields, "service_name")
 
     Application.put_env(:honeylixir, :service_name, old_val)
+
+    Honeylixir.GlobalFields.add_field("global", "this is great")
+
+    event = Honeylixir.Event.create()
+    assert event.fields == %{"global" => "this is great", "service_name" => "honeylixir-tests"}
+
+    Honeylixir.GlobalFields.remove_field("global")
   end
 
   test "create/1 - timestamp" do

@@ -78,7 +78,7 @@ defmodule Honeylixir.Event do
   end
 
   def create(timestamp) when is_binary(timestamp) do
-    %{base_event() | timestamp: timestamp}
+    %{create() | timestamp: timestamp}
   end
 
   @doc """
@@ -88,8 +88,7 @@ defmodule Honeylixir.Event do
   @doc since: "0.1.0"
   @spec create(rfc_timestamp(), map()) :: t()
   def create(timestamp, %{} = fields) when is_binary(timestamp) do
-    event = base_event()
-    event = %{event | timestamp: timestamp}
+    event = %{create() | timestamp: timestamp}
 
     Honeylixir.Event.add(event, fields)
   end
@@ -185,6 +184,7 @@ defmodule Honeylixir.Event do
       timestamp: utc_timestamp()
     }
     |> add_service_name()
+    |> Honeylixir.Event.add(Honeylixir.GlobalFields.fields())
   end
 
   defp utc_timestamp(), do: DateTime.to_string(datetime_module().utc_now())
