@@ -90,8 +90,8 @@ defmodule HoneylixirTransmissionSenderTest do
     assert resp_1.metadata == %{id: 1}
     assert resp_2.metadata == %{id: 2}
 
-    assert is_integer(resp_1.duration)
-    assert is_integer(resp_2.duration)
+    assert is_float(resp_1.duration)
+    assert is_float(resp_2.duration)
 
     assert resp_1.status_code == 401
     assert resp_2.status_code == 401
@@ -123,8 +123,8 @@ defmodule HoneylixirTransmissionSenderTest do
     assert resp_1.metadata == %{id: 3}
     assert resp_2.metadata == %{id: 4}
 
-    assert is_integer(resp_1.duration)
-    assert is_integer(resp_2.duration)
+    assert is_float(resp_1.duration)
+    assert is_float(resp_2.duration)
 
     assert resp_1.status_code == 500
     assert resp_2.status_code == 500
@@ -156,8 +156,8 @@ defmodule HoneylixirTransmissionSenderTest do
     assert resp_1.metadata == %{id: 6}
     assert resp_2.metadata == %{id: 7}
 
-    assert is_integer(resp_1.duration)
-    assert is_integer(resp_2.duration)
+    assert is_float(resp_1.duration)
+    assert is_float(resp_2.duration)
 
     assert resp_1.status_code == 504
     assert resp_2.status_code == 504
@@ -189,8 +189,8 @@ defmodule HoneylixirTransmissionSenderTest do
     assert resp_1.metadata == %{id: 8}
     assert resp_2.metadata == %{id: 9}
 
-    assert is_integer(resp_1.duration)
-    assert is_integer(resp_2.duration)
+    assert is_float(resp_1.duration)
+    assert is_float(resp_2.duration)
 
     assert resp_1.status_code == 500
     assert resp_2.status_code == 500
@@ -222,8 +222,8 @@ defmodule HoneylixirTransmissionSenderTest do
     assert resp_1.metadata == %{id: 10}
     assert resp_2.metadata == %{id: 11}
 
-    assert is_integer(resp_1.duration)
-    assert is_integer(resp_2.duration)
+    assert is_float(resp_1.duration)
+    assert is_float(resp_2.duration)
 
     assert resp_1.status_code == 500
     assert resp_2.status_code == 500
@@ -253,8 +253,8 @@ defmodule HoneylixirTransmissionSenderTest do
     assert resp_1.metadata == %{id: 12}
     assert resp_2.metadata == %{id: 13}
 
-    assert is_integer(resp_1.duration)
-    assert is_integer(resp_2.duration)
+    assert is_float(resp_1.duration)
+    assert is_float(resp_2.duration)
 
     assert resp_1.status_code == nil
     assert resp_2.status_code == nil

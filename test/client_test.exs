@@ -98,7 +98,7 @@ defmodule HoneylixirClientTest do
     {:ok, resp, duration} = Honeylixir.Client.send_batch([event])
 
     # All we can do, no idea how long things take.
-    assert is_integer(duration)
+    assert is_float(duration)
     assert "[{\"status\":202}]" == resp.body
   end
 
@@ -111,7 +111,7 @@ defmodule HoneylixirClientTest do
 
     {:failure, _, duration} = Honeylixir.Client.send_batch([event])
 
-    assert is_integer(duration)
+    assert is_float(duration)
   end
 
   test "send_batch/1 - failure", %{bypass: bypass} do

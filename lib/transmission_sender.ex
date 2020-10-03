@@ -17,11 +17,7 @@ defmodule Honeylixir.TransmissionSender do
       {:ok, response, duration} ->
         responses = Jason.decode!(response.body)
 
-        process_event_responses(
-          events,
-          responses,
-          System.convert_time_unit(duration, :native, :millisecond)
-        )
+        process_event_responses(events, responses, duration)
 
       {:failure, response, duration} ->
         error_body = error_response_body(Jason.decode(response.body))

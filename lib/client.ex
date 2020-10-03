@@ -54,7 +54,13 @@ defmodule Honeylixir.Client do
 
     start = System.monotonic_time()
     result = post(url, body, headers, hackney: [pool: :default])
-    duration = System.monotonic_time() - start
+    # Perform a little quick calculation to get our native time into microseconds
+    # then divide by a thousand to get a floating point millisecond duration.
+    duration =
+      (System.monotonic_time() - start)
+      |> System.convert_time_unit(:native, :microsecond)
+
+    duration = Float.round(duration / 1000, 3)
 
     case result do
       {:ok, %HTTPoison.Response{status_code: 200} = response} ->
