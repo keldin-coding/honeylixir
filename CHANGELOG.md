@@ -5,6 +5,7 @@
 * Notably adjust `duration` as determined in the `Honeylixir.Response` object to be a floating point number of milliseconds, such that something taking 100 microseconds is represented roughly as 0.1.
 * Add support for Global field configuration
 * No longer drop events when `max_children` is reached and no more `TransmissionSender`s can be started
+* `TransmissionQueue` continuously tries to empty itself
 
 # 0.3.0
 

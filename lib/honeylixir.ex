@@ -129,6 +129,17 @@ defmodule Honeylixir do
   Honeylixir.Event.create() |> Honeylixir.Event.send()
   # wait for event to async send off and the associated Response will be output
   ```
+
+  You can also attach to the function used for key creation:
+
+  ```
+  :telemetry.attach(
+    "my-listener",
+    Honeylixir.event_send_telemetry_key(),
+    fn _, _, _, _ -> nil end,
+    nil
+  )
+  ```
   """
 
   use Application
