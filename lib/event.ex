@@ -152,8 +152,8 @@ defmodule Honeylixir.Event do
   be sent asynchronously. Currently nothing stops a user from sending the same
   event twice.
 
-  If the event is sampled, a `Honeylixir.Response` is added to the `Honeylixir.ResponseQueue`
-  with the `err` attribute set to `:sampled`.
+  If the event is sampled, a `Honeylixir.Response` is sent via `:telemetry`
+  immediately.
   """
   @spec send(t()) :: :ok
   def send(%Honeylixir.Event{sample_rate: 1} = event),
@@ -166,13 +166,11 @@ defmodule Honeylixir.Event do
         :ok
 
       _ ->
-        Honeylixir.ResponseQueue.add(%Honeylixir.Response{
-          metadata: event.metadata,
-          duration: 0,
-          status_code: nil,
-          body: nil,
-          err: :sampled
-        })
+        :telemetry.execute(
+          Honeylixir.event_send_telemetry_key(),
+          %{},
+          %{response: Honeylixir.Response.sampled_response(event)}
+        )
 
         :ok
     end

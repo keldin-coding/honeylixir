@@ -9,7 +9,7 @@ defmodule Honeylixir.TransmissionSender do
   @doc """
   Does the actual passoff to the `Honeylixir.Client` for sending.
 
-  Responses are added to the `Honeylixir.ResponseQueue` as they complete.
+  Responses are sent via `:telemetry.execute/3`.
   """
   @spec send_batch(list(Honeylixir.Event.t())) :: :ok
   def send_batch(events) do
@@ -35,13 +35,11 @@ defmodule Honeylixir.TransmissionSender do
 
       {:error, %HTTPoison.Error{}, duration} ->
         Enum.each(events, fn event ->
-          Honeylixir.ResponseQueue.add(%Honeylixir.Response{
-            metadata: event.metadata,
-            duration: duration,
-            status_code: nil,
-            body: "",
-            err: :http_error
-          })
+          :telemetry.execute(
+            Honeylixir.event_send_telemetry_key(),
+            %{},
+            %{response: Honeylixir.Response.http_error_response(event, duration)}
+          )
         end)
 
         :ok
@@ -61,13 +59,11 @@ defmodule Honeylixir.TransmissionSender do
   defp process_event_responses([], [], _), do: :ok
 
   defp process_event_responses([event | rest], [%{"status" => 202} | response_rest], duration) do
-    Honeylixir.ResponseQueue.add(%Honeylixir.Response{
-      metadata: event.metadata,
-      duration: duration,
-      status_code: 202,
-      body: "",
-      err: nil
-    })
+    :telemetry.execute(
+      Honeylixir.event_send_telemetry_key(),
+      %{},
+      %{response: Honeylixir.Response.success_response(event, duration, 202)}
+    )
 
     process_event_responses(rest, response_rest, duration)
   end
@@ -77,13 +73,11 @@ defmodule Honeylixir.TransmissionSender do
          [%{"error" => error_body, "status" => status_code} | response_rest],
          duration
        ) do
-    Honeylixir.ResponseQueue.add(%Honeylixir.Response{
-      metadata: event.metadata,
-      duration: duration,
-      status_code: status_code,
-      body: error_body,
-      err: nil
-    })
+    :telemetry.execute(
+      Honeylixir.event_send_telemetry_key(),
+      %{},
+      %{response: Honeylixir.Response.failure_response(event, duration, status_code, error_body)}
+    )
 
     process_event_responses(rest, response_rest, duration)
   end

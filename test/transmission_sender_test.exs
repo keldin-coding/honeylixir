@@ -2,8 +2,37 @@ defmodule HoneylixirTransmissionSenderTest do
   use ExUnit.Case, async: false
   doctest Honeylixir.TransmissionSender
 
+  defmodule ResponseTestQueue do
+    use Agent
+
+    def start_link(_) do
+      Agent.start_link(fn -> [] end, name: __MODULE__)
+    end
+
+    def add(response) do
+      Agent.update(__MODULE__, fn state -> state ++ [response] end)
+    end
+
+    def pop do
+      Agent.get_and_update(__MODULE__, fn [head | rest] -> {head, rest} end)
+    end
+  end
+
   setup do
     bypass = Bypass.open()
+    start_supervised!(ResponseTestQueue)
+
+    :telemetry.attach(
+      "add-to-response-stack",
+      [:honeylixir, :event, :send],
+      fn _, _, %{response: response}, _ ->
+        ResponseTestQueue.add(response)
+      end,
+      nil
+    )
+
+    on_exit(fn -> :telemetry.detach("add-to-response-stack") end)
+
     {:ok, bypass: bypass}
   end
 
@@ -27,8 +56,8 @@ defmodule HoneylixirTransmissionSenderTest do
 
     assert Honeylixir.TransmissionSender.send_batch(events) == :ok
 
-    resp_1 = Honeylixir.ResponseQueue.pop()
-    resp_2 = Honeylixir.ResponseQueue.pop()
+    resp_1 = ResponseTestQueue.pop()
+    resp_2 = ResponseTestQueue.pop()
 
     assert resp_1.metadata == %{"success" => true}
     assert resp_1.status_code == 202
@@ -55,8 +84,8 @@ defmodule HoneylixirTransmissionSenderTest do
 
     assert Honeylixir.TransmissionSender.send_batch(events) == :ok
 
-    resp_1 = Honeylixir.ResponseQueue.pop()
-    resp_2 = Honeylixir.ResponseQueue.pop()
+    resp_1 = ResponseTestQueue.pop()
+    resp_2 = ResponseTestQueue.pop()
 
     assert resp_1.metadata == %{id: 1}
     assert resp_2.metadata == %{id: 2}
@@ -88,8 +117,8 @@ defmodule HoneylixirTransmissionSenderTest do
 
     assert Honeylixir.TransmissionSender.send_batch(events) == :ok
 
-    resp_1 = Honeylixir.ResponseQueue.pop()
-    resp_2 = Honeylixir.ResponseQueue.pop()
+    resp_1 = ResponseTestQueue.pop()
+    resp_2 = ResponseTestQueue.pop()
 
     assert resp_1.metadata == %{id: 3}
     assert resp_2.metadata == %{id: 4}
@@ -121,8 +150,8 @@ defmodule HoneylixirTransmissionSenderTest do
 
     assert Honeylixir.TransmissionSender.send_batch(events) == :ok
 
-    resp_1 = Honeylixir.ResponseQueue.pop()
-    resp_2 = Honeylixir.ResponseQueue.pop()
+    resp_1 = ResponseTestQueue.pop()
+    resp_2 = ResponseTestQueue.pop()
 
     assert resp_1.metadata == %{id: 6}
     assert resp_2.metadata == %{id: 7}
@@ -154,8 +183,8 @@ defmodule HoneylixirTransmissionSenderTest do
 
     assert Honeylixir.TransmissionSender.send_batch(events) == :ok
 
-    resp_1 = Honeylixir.ResponseQueue.pop()
-    resp_2 = Honeylixir.ResponseQueue.pop()
+    resp_1 = ResponseTestQueue.pop()
+    resp_2 = ResponseTestQueue.pop()
 
     assert resp_1.metadata == %{id: 8}
     assert resp_2.metadata == %{id: 9}
@@ -187,8 +216,8 @@ defmodule HoneylixirTransmissionSenderTest do
 
     assert Honeylixir.TransmissionSender.send_batch(events) == :ok
 
-    resp_1 = Honeylixir.ResponseQueue.pop()
-    resp_2 = Honeylixir.ResponseQueue.pop()
+    resp_1 = ResponseTestQueue.pop()
+    resp_2 = ResponseTestQueue.pop()
 
     assert resp_1.metadata == %{id: 10}
     assert resp_2.metadata == %{id: 11}
@@ -218,8 +247,8 @@ defmodule HoneylixirTransmissionSenderTest do
 
     assert Honeylixir.TransmissionSender.send_batch(events) == :ok
 
-    resp_1 = Honeylixir.ResponseQueue.pop()
-    resp_2 = Honeylixir.ResponseQueue.pop()
+    resp_1 = ResponseTestQueue.pop()
+    resp_2 = ResponseTestQueue.pop()
 
     assert resp_1.metadata == %{id: 12}
     assert resp_2.metadata == %{id: 13}
@@ -230,8 +259,8 @@ defmodule HoneylixirTransmissionSenderTest do
     assert resp_1.status_code == nil
     assert resp_2.status_code == nil
 
-    assert resp_1.body == ""
-    assert resp_2.body == ""
+    assert resp_1.body == nil
+    assert resp_2.body == nil
 
     assert resp_1.err == :http_error
     assert resp_2.err == :http_error

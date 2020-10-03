@@ -1,3 +1,8 @@
+# 0.4.0 (in progress)
+
+* Cleaned up mix.exs file [#2](https://github.com/lirossarvet/honeylixir/pull/2)
+* **BREAKING** Removed the `ResponseQueue` in favor of `:telemetry` execution
+
 # 0.3.0
 
 * **BREAKING**: Change LICENSE from MIT to Apache-2.0

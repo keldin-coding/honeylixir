@@ -39,6 +39,17 @@ defmodule HoneylixirTransmissionQueueTest do
 
     new_queue = %Honeylixir.TransmissionQueue{size: 4, items: items}
 
+    :telemetry.attach(
+      "transmission_queue_test.handle_cast(:enqueue_event)/3",
+      [:honeylixir, :event, :send],
+      fn _, _, %{response: response}, _ ->
+        if response.metadata == %{id: "enqueue_overflow"} do
+          assert response.err == :overflow
+        end
+      end,
+      nil
+    )
+
     state = %{
       :batch_timing => 3,
       :max_queue_size => 4,
@@ -46,21 +57,16 @@ defmodule HoneylixirTransmissionQueueTest do
       default_queue_key() => new_queue
     }
 
+    event = Honeylixir.Event.create()
+    event = %{event | metadata: %{id: "enqueue_overflow"}}
+
     assert {:noreply, state} ==
              Honeylixir.TransmissionQueue.handle_cast(
-               {:enqueue_event, Honeylixir.Event.create()},
+               {:enqueue_event, event},
                state
              )
 
-    resp = Honeylixir.ResponseQueue.pop()
-
-    assert resp == %Honeylixir.Response{
-             metadata: %{},
-             duration: 0,
-             status_code: nil,
-             body: "",
-             err: :overflow
-           }
+    :telemetry.detach("transmission_queue_test.handle_cast(:enqueue_event)/3")
   end
 
   test "handle_cast/3 - :process_batch" do

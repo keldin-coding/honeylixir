@@ -47,6 +47,7 @@ defmodule Honeylixir.MixProject do
     [
       {:httpoison, "~> 1.5"},
       {:jason, "~> 1.1"},
+      {:telemetry, "~> 0.4"},
       {:ex_doc, "~> 0.22", only: :dev},
       {:bypass, "~> 2.0.0",
        git: "https://github.com/josevalim/bypass.git", branch: "jv-latest-cowboy", only: :test}

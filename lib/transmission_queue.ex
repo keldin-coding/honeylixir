@@ -86,13 +86,11 @@ defmodule Honeylixir.TransmissionQueue do
     if queue_for_event.size >= max_queue_size do
       # This should also technically add to the response queue that the queue for
       # sending messages is full.
-      Honeylixir.ResponseQueue.add(%Honeylixir.Response{
-        metadata: event.metadata,
-        duration: 0,
-        status_code: nil,
-        body: "",
-        err: :overflow
-      })
+      :telemetry.execute(
+        Honeylixir.event_send_telemetry_key(),
+        %{},
+        %{response: Honeylixir.Response.overflow_response(event)}
+      )
 
       {:noreply, state}
     else

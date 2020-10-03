@@ -23,3 +23,8 @@ be found at [https://hexdocs.pm/honeylixir](https://hexdocs.pm/honeylixir).
 ## Usage
 
 Please visit the [Hexdocs site](https://hexdocs.pm/honeylixir) for the latest documentation around usage and configuration.
+
+## Related works
+
+* [libhoney-ex](https://github.com/carwow/libhoney-ex) - the first Elixir Honeycomb client I stumbled upon
+* [opencensus_honeycomb](https://github.com/opencensus-beam/opencensus_honeycomb) - a fully fledged OpenCensus implementation for Honeycomb. I definitely liked the idea of using `:telemetry` in their project and adopted something similar in mine. Fewer Processes == fewer places for things to go wrong.

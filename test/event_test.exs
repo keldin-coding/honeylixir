@@ -73,29 +73,29 @@ defmodule HoneylixirEventTest do
 
     # Default sample rate of 1
     assert Honeylixir.Event.send(event) == :ok
-    assert Honeylixir.ResponseQueue.pop() == nil
 
     :rand.seed(:exsss, {123, 456, 789})
-    event = %{event | sample_rate: 2}
+    event = %{event | sample_rate: 2, metadata: %{id: "test-send/1"}}
 
     # The ordering here is important and relies on the seed setting above
     #
-    # TODO: These tests can eventually pull from the ResponseQueue once that is
-    # a thing that exists.
     # random/1 returns 2
-    assert Honeylixir.Event.send(event) == :ok
-    resp = Honeylixir.ResponseQueue.pop()
+    :telemetry.attach(
+      "event_test.send/1",
+      [:honeylixir, :event, :send],
+      fn _, _, %{response: response}, _ ->
+        if response.metadata == %{id: "test-send/1"} do
+          assert response.err == :sampled
+        end
+      end,
+      nil
+    )
 
-    assert %Honeylixir.Response{
-             metadata: %{},
-             duration: 0,
-             status_code: nil,
-             body: nil,
-             err: :sampled
-           } == resp
+    assert Honeylixir.Event.send(event) == :ok
+
+    :telemetry.detach("event_test.send/1")
 
     # random/1 returns 1
-    assert Honeylixir.Event.send(event) == :ok
-    assert Honeylixir.ResponseQueue.pop() == nil
+    assert Honeylixir.Event.send(Honeylixir.Event.create()) == :ok
   end
 end

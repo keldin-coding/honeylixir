@@ -30,8 +30,6 @@ defmodule Honeylixir do
   |`:batch_size`|`integer`|How many events to send per batch|`50`|
   |`:batch_timing`|`integer`|Time in milliseconds to try sending events from the queue in a batch|`100`|
   |`:max_send_processes`|`integer`|How many Processes to use for sending events in the background|`30`|
-  |`:max_response_queue_size`|`integer`|How many responses for event sending can be held in the queue. Once reached, responses are dropped|`100`|
-
 
   It is required that you set `:team_writekey` and `:dataset` for events to be sent. Otherwise,
   they will return non-200 responses from Honeycomb resulting in the events being dropped. An
@@ -71,13 +69,24 @@ defmodule Honeylixir do
   ### Checking responses
 
   By attaching metadata to your events, you can pull `Honeylixir.Response`s to see what happened
-  to your event. This data is stored in the `Honeylixir.ResponseQueue` which acts as a small
-  data store.
+  to your event. These are sent along via `:telemetry` for getting events as part of the `metadata`
+  object at the `:response` field. Current eventNames:
+
+  * `[:honeylixir, :event, :send]` - Used for the response around any event sent, even if that event is sampled or rejected for queue overflow. Metadata is set to `%{response: %Honeylixir.Response}` which contains the data.
 
   ```
+  # Note: as stated in the `:telemetry` docs, you should use function capture rather than anonymous functions.
+  :telemetry.attach(
+    "test-attachment",
+    [:honeylixir, :event, :send],
+    fn _event_name, _measurements, %{response: response}, _config ->
+      IO.inspect response
+    end,
+    nil
+  )
+
   Honeylixir.Event.create() |> Honeylixir.Event.send()
-  # wait for event to async send off
-  resp = Honeylixir.ResponseQueue.pop()
+  # wait for event to async send off and the associated Response will be output
   ```
   """
 
@@ -90,10 +99,6 @@ defmodule Honeylixir do
 
   defp children do
     [
-      {Honeylixir.ResponseQueue,
-       %{
-         max_response_queue_size: Application.get_env(:honeylixir, :max_response_queue_size, 100)
-       }},
       {Honeylixir.TransmissionQueue,
        %{
          max_queue_size: Application.get_env(:honeylixir, :max_queue_size, 10_000),
@@ -121,4 +126,6 @@ defmodule Honeylixir do
   def generate_short_id do
     :crypto.strong_rand_bytes(8) |> Base.encode16(case: :lower)
   end
+
+  def event_send_telemetry_key, do: [:honeylixir, :event, :send]
 end
