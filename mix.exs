@@ -1,6 +1,8 @@
 defmodule Honeylixir.MixProject do
   use Mix.Project
 
+  @source_url "https://github.com/lirossarvet/honeylixir"
+
   def project do
     [
       app: :honeylixir,
@@ -8,21 +10,13 @@ defmodule Honeylixir.MixProject do
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-
-      # Docs
-      source_url: "https://github.com/lirossarvet/honeylixir",
+      docs: docs(),
       description: description(),
       elixirc_paths: compiler_paths(Mix.env()),
-      docs: [
-        main: Honeylixir
-      ],
-
-      # Package
       package: package()
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
       mod: {Honeylixir, []},
@@ -35,14 +29,20 @@ defmodule Honeylixir.MixProject do
     [
       name: "honeylixir",
       licenses: ["Apache-2.0"],
-      links: %{"Github" => "https://github.com/lirossarvet/honeylixir"}
+      links: %{"Github" => @source_url}
+    ]
+  end
+
+  defp docs do
+    [
+      main: Honeylixir,
+      source_url: @source_url
     ]
   end
 
   defp compiler_paths(:test), do: ["test/support"] ++ compiler_paths(:prod)
   defp compiler_paths(_), do: ["lib"]
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       {:httpoison, "~> 1.5"},
@@ -50,9 +50,6 @@ defmodule Honeylixir.MixProject do
       {:ex_doc, "~> 0.22", only: :dev},
       {:bypass, "~> 2.0.0",
        git: "https://github.com/josevalim/bypass.git", branch: "jv-latest-cowboy", only: :test}
-      # {:jason, ">= 0.1.0"}
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
   end
 
