@@ -146,7 +146,7 @@ defmodule Honeylixir.TransmissionQueue do
     do: {:noreply, state}
 
   defp _handle_process_batch(
-         state,
+         %{batch_size: batch_size} = state,
          %Honeylixir.TransmissionQueue{} = queue_for_batch,
          {_api_host, _team_writekey, _dataset} = queue_key,
          current_batch_size
@@ -171,11 +171,18 @@ defmodule Honeylixir.TransmissionQueue do
     # likely by setting new state to old state and carrying on.
     case Honeylixir.Transmission.send_batch(batch) do
       {:ok, _} ->
+        new_size = queue_for_batch.size - current_batch_size
+
         new_state =
           Map.put(state, queue_key, %Honeylixir.TransmissionQueue{
             size: queue_for_batch.size - current_batch_size,
             items: remaining_items
           })
+
+        # Continuously process batches if this particular queue is still full
+        if new_size >= batch_size do
+          Honeylixir.TransmissionQueue.process_batch(queue_key)
+        end
 
         {:noreply, new_state}
 
