@@ -42,8 +42,9 @@ defmodule Honeylixir do
     service_name: :my_application
   ```
 
-  Additionally, these are all defined on attributes so you can change them on a
-  per event basis if desired.
+  Additionally, many are defined on the `Honeylixir.Event` struct and can be overridden
+  on a per-event basis. Please check its typspec for a complete list of what you can
+  modify.
 
   ```
   event = Honeylixir.Event.create()
@@ -84,6 +85,26 @@ defmodule Honeylixir do
   Honeylixir.GlobalFields.remove_field("my-thing")
   IO.inspect Honeylixir.GlobalFields.fields
   # => %{}
+  ```
+
+  ### Builder pattern
+
+  Currently, the Builder pattern is supported insomuch as Elixir's syntax allows it. That is to say, you can create
+  your own function that acts as a Builder.
+
+  ```
+  defmodule MyHoneylixirBuilders do
+    def http_event do
+      Honeylixir.Event.create()
+      |> Honeylixir.add_field("foo", "bar")
+    end
+
+    def different_dataset_event do
+      %{Honeylixir.Event.create() | dataset: "my-other-dataset"}
+      |> Honeylixir.add_field("something", "great")
+      |> Honeylixir.add_field("another", "thing")
+    end
+  end
   ```
 
   ### Checking responses
