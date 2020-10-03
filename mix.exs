@@ -7,7 +7,7 @@ defmodule Honeylixir.MixProject do
     [
       app: :honeylixir,
       version: "0.4.0",
-      elixir: "~> 1.10",
+      elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       docs: docs(),
