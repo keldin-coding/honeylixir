@@ -4,6 +4,8 @@ defmodule Honeylixir.TransmissionQueue do
   """
   use GenServer
 
+  require Logger
+
   @internal_fields [:batch_timing, :max_queue_size, :batch_size]
 
   @enforce_fields [:size, :items]
@@ -167,14 +169,24 @@ defmodule Honeylixir.TransmissionQueue do
 
     # Handle the task supervisor being at max and rejecting creation here. Most
     # likely by setting new state to old state and carrying on.
-    Honeylixir.Transmission.send_batch(batch)
+    case Honeylixir.Transmission.send_batch(batch) do
+      {:ok, _} ->
+        new_state =
+          Map.put(state, queue_key, %Honeylixir.TransmissionQueue{
+            size: queue_for_batch.size - current_batch_size,
+            items: remaining_items
+          })
 
-    new_state =
-      Map.put(state, queue_key, %Honeylixir.TransmissionQueue{
-        size: queue_for_batch.size - current_batch_size,
-        items: remaining_items
-      })
+        {:noreply, new_state}
 
-    {:noreply, new_state}
+      {:error, :max_children} ->
+        Logger.warn("Cannot start new sender, max children already running")
+        {:noreply, state}
+
+      _ ->
+        {:noreply, state}
+    end
+
+
   end
 end
