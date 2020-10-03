@@ -186,7 +186,5 @@ defmodule Honeylixir.TransmissionQueue do
       _ ->
         {:noreply, state}
     end
-
-
   end
 end
