@@ -5,12 +5,7 @@ defmodule Honeylixir.Event do
   """
   @moduledoc since: "0.1.0"
 
-  @datetime_module Application.get_env(:honeylixir, :datetime_module) || DateTime
-  @api_host Application.get_env(:honeylixir, :api_host, "https://api.honeycomb.io")
-  @sample_rate Application.get_env(:honeylixir, :sample_rate, 1)
-  @team_writekey Application.get_env(:honeylixir, :team_writekey)
-  @dataset Application.get_env(:honeylixir, :dataset)
-  @service_name Application.get_env(:honeylixir, :service_name)
+  # This one is mainly for testing only so we an force a timestamp for comparing
 
   @typedoc """
   An RFC3339 formatted timestamp
@@ -29,11 +24,16 @@ defmodule Honeylixir.Event do
   event = Honeylixir.Event.create()
   event = %{event | api_host: "something-else.com"}
   ```
+
+  An Event also includes two other fields:
+  * `fields` - The set of fields which will be sent to Honeycomb as the event body
+  * `metadata` - A map of extra data that may be provided as part of a response.
   """
   @type t :: %__MODULE__{
           api_host: String.t(),
           dataset: String.t() | atom(),
           fields: map(),
+          metadata: map(),
           sample_rate: integer(),
           team_writekey: String.t(),
           timestamp: rfc_timestamp()
@@ -44,7 +44,8 @@ defmodule Honeylixir.Event do
     :sample_rate,
     :team_writekey,
     :timestamp,
-    fields: %{}
+    fields: %{},
+    metadata: %{}
   ]
 
   @doc """
@@ -90,9 +91,7 @@ defmodule Honeylixir.Event do
     event = base_event()
     event = %{event | timestamp: timestamp}
 
-    Enum.reduce(fields, event, fn {k, v}, acc_event ->
-      add_field(acc_event, k, v)
-    end)
+    Honeylixir.Event.add(event, fields)
   end
 
   @doc """
@@ -114,31 +113,114 @@ defmodule Honeylixir.Event do
   end
 
   @doc """
+  Adds a map of fields into the existing set.
+
+  ## Examples
+
+      iex> event = Honeylixir.Event.create()
+      iex> Honeylixir.Event.add(event, %{"another" => "field", "service_name" => "foobar"}).fields
+      %{"service_name" => "foobar", "another" => "field"}
+  """
+  @spec add(Honeylixir.Event.t(), map()) :: t()
+  def add(%Honeylixir.Event{} = event, %{} = fieldset) do
+    Enum.reduce(fieldset, event, fn {k, v}, acc_event ->
+      add_field(acc_event, k, v)
+    end)
+  end
+
+  @doc """
+  Adds to the metadata of the event.
+
+  This information is NOT passed along to LaunchDarkly and should only be used
+  by the consuming application to keep track of an event.
+
+  ## Examples
+
+      iex> event = Honeylixir.Event.create()
+      iex> Honeylixir.Event.add_metadata(event, %{"some_key" => "some_value"}).metadata
+      %{"some_key" => "some_value"}
+  """
+  @spec add_metadata(t(), map()) :: t()
+  def add_metadata(%Honeylixir.Event{} = event, %{} = metadata) do
+    new_metadata = Map.merge(event.metadata, metadata)
+
+    %{event | metadata: new_metadata}
+  end
+
+  @doc """
   Used for acknowledging the event is ready for sending, passing it off to
   be sent asynchronously. Currently nothing stops a user from sending the same
   event twice.
+
+  If the event is sampled, a `Honeylixir.Response` is added to the `Honeylixir.ResponseQueue`
+  with the `err` attribute set to `:sampled`.
   """
-  @spec send(t()) :: {:ok, :processed | :sampled}
-  def send(%Honeylixir.Event{} = event), do: Honeylixir.Transmission.send_event(event)
+  @spec send(t()) :: :ok
+  def send(%Honeylixir.Event{sample_rate: 1} = event),
+    do: Honeylixir.TransmissionQueue.enqueue_event(event)
+
+  def send(%Honeylixir.Event{} = event) do
+    case Enum.random(1..event.sample_rate) do
+      1 ->
+        Honeylixir.TransmissionQueue.enqueue_event(event)
+        :ok
+
+      _ ->
+        Honeylixir.ResponseQueue.add(%Honeylixir.Response{
+          metadata: event.metadata,
+          duration: 0,
+          status_code: nil,
+          body: nil,
+          err: :sampled
+        })
+
+        :ok
+    end
+  end
 
   defp base_event() do
     %Honeylixir.Event{
-      api_host: @api_host,
-      sample_rate: @sample_rate,
-      team_writekey: @team_writekey,
-      dataset: @dataset,
+      api_host: api_host(),
+      sample_rate: sample_rate(),
+      team_writekey: team_writekey(),
+      dataset: dataset(),
       timestamp: utc_timestamp()
     }
     |> add_service_name()
   end
 
-  defp utc_timestamp(), do: DateTime.to_string(@datetime_module.utc_now())
+  defp utc_timestamp(), do: DateTime.to_string(datetime_module().utc_now())
 
   defp add_service_name(event) do
-    if @service_name != nil do
-      add_field(event, "service_name", @service_name)
+    if service_name() != nil do
+      add_field(event, "service_name", service_name())
     else
       event
     end
+  end
+
+  # Intended mainly for unit testing dependency injection.
+  defp datetime_module do
+    Application.get_env(:honeylixir, :datetime_module, DateTime)
+  end
+
+  defp api_host do
+    Application.get_env(:honeylixir, :api_host, "https://api.honeycomb.io")
+  end
+
+  defp sample_rate do
+    Application.get_env(:honeylixir, :sample_rate, 1)
+  end
+
+  defp team_writekey do
+    Application.get_env(:honeylixir, :team_writekey)
+  end
+
+  defp dataset do
+    Application.get_env(:honeylixir, :dataset)
+  end
+
+  defp service_name do
+    Application.get_env(:honeylixir, :service_name)
   end
 end

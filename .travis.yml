@@ -14,6 +14,8 @@ install:
   # Install buildevents
   - curl -L -o buildevents https://github.com/honeycombio/buildevents/releases/latest/download/buildevents-linux-amd64
   - chmod 755 buildevents
+  # Create an empty file. This file is used in development to make saving a API key easier
+  - touch config/dev_secret.exs
   - ./buildevents cmd $TRAVIS_BUILD_ID $STEP_SPAN_ID mix-local-rebar -- mix local.rebar --force
   - ./buildevents cmd $TRAVIS_BUILD_ID $STEP_SPAN_ID mix-hex -- mix local.hex --force
   - ./buildevents cmd $TRAVIS_BUILD_ID $STEP_SPAN_ID mix-deps-get -- mix deps.get

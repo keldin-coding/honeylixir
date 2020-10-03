@@ -1,16 +1,11 @@
 defmodule Honeylixir.Client do
-  @moduledoc """
-  A client used for explicitly making the HTTP requests to Honeycomb.
-  """
-  @moduledoc since: "0.1.0"
+  @moduledoc false
 
   use HTTPoison.Base
 
-  @doc """
-  Function responsible for sending the event off to Honeycomb. Handles adding
-  headers required, constructing the URI, and finally sending it off.
-  """
-  @spec send_event(Honeylixir.Event.t()) :: {:ok | :error, nil | String.t() | HTTPoison.Error.t()}
+  # Function responsible for sending the event off to Honeycomb. Handles adding
+  # headers required, constructing the URI, and finally sending it off.
+  # @spec send_event(Honeylixir.Event.t()) :: {:ok | :error, nil | String.t() | HTTPoison.Error.t()}
   def send_event(%Honeylixir.Event{} = event) do
     url = "#{event.api_host}/1/events/#{event.dataset}"
 
@@ -23,11 +18,11 @@ defmodule Honeylixir.Client do
         ]
 
         case post(url, body, headers, hackney: [pool: :default]) do
-          {:ok, %HTTPoison.Response{status_code: 200}} ->
-            {:ok, nil}
+          {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+            {:ok, body}
 
           {:ok, %HTTPoison.Response{body: body}} ->
-            {:error, body}
+            {:failure, body}
 
           {:error, error} ->
             {:error, error}
@@ -38,17 +33,50 @@ defmodule Honeylixir.Client do
     end
   end
 
-  @doc """
-  Adds standard headers for all requests that do not vary by data sent.
+  def send_batch([]), do: {:ok, nil}
 
-  ## Examples
+  def send_batch(events) when is_list(events) do
+    [first_event | _] = events
 
-      iex> Honeylixir.Client.process_request_headers([])
-      [{"Content-Type", "application/json"}, {"User-Agent", "libhoney-honeylixir/0.2.0"}]
+    url = "#{first_event.api_host}/1/batch/#{first_event.dataset}"
 
-      iex> Honeylixir.Client.process_request_headers([{"X-Foo", "foo"}])
-      [{"Content-Type", "application/json"}, {"User-Agent", "libhoney-honeylixir/0.2.0"}, {"X-Foo", "foo"}]
-  """
+    sendable_events =
+      Enum.map(events, fn event ->
+        %{data: event.fields, time: event.timestamp, samplerate: event.sample_rate}
+      end)
+
+    body = Jason.encode!(sendable_events) |> :zlib.gzip()
+
+    headers = [
+      {"Content-Encoding", "gzip"},
+      {"X-Honeycomb-Team", first_event.team_writekey}
+    ]
+
+    start = System.monotonic_time()
+    result = post(url, body, headers, hackney: [pool: :default])
+    duration = System.monotonic_time() - start
+
+    case result do
+      {:ok, %HTTPoison.Response{status_code: 200} = response} ->
+        {:ok, response, duration}
+
+      {:ok, %HTTPoison.Response{} = response} ->
+        {:failure, response, duration}
+
+      {:error, error} ->
+        {:error, error, duration}
+    end
+  end
+
+  # Adds standard headers for all requests that do not vary by data sent.
+  #
+  # ## Examples
+  #
+  #     iex> Honeylixir.Client.process_request_headers([])
+  #     [{"Content-Type", "application/json"}, {"User-Agent", "libhoney-honeylixir/0.2.0"}]
+  #
+  #     iex> Honeylixir.Client.process_request_headers([{"X-Foo", "foo"}])
+  #     [{"Content-Type", "application/json"}, {"User-Agent", "libhoney-honeylixir/0.2.0"}, {"X-Foo", "foo"}]
   @impl true
   def process_request_headers(headers) do
     # Todo: Interpolate the version from what it is

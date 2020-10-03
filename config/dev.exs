@@ -1,5 +1,7 @@
 import Config
 
-config :honeylixir, :dataset, System.get_env("HONEYLIXIR_DATASET", "honeylixir")
-config :honeylixir, :team_writekey, System.get_env("HONEYLIXIR_WRITEKEY")
-config :honeylixir, :service_name, :honeylixir
+config :honeylixir,
+  dataset: "honeylixir-test",
+  service_name: :honeylixir
+
+import_config "dev_secret.exs"

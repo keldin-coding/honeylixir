@@ -23,3 +23,5 @@ erl_crash.dump
 honeylixir-*.tar
 
 .DS_Store
+
+config/dev_secret.exs

@@ -34,7 +34,7 @@ defmodule Honeylixir.MixProject do
   defp package do
     [
       name: "honeylixir",
-      licenses: ["MIT"],
+      licenses: ["Apache-2.0"],
       links: %{"Github" => "https://github.com/lirossarvet/honeylixir"}
     ]
   end

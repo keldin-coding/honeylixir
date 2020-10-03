@@ -1,32 +1,24 @@
 defmodule Honeylixir.Transmission do
-  @moduledoc false
+  @moduledoc """
+  Transmission engine that handles sending events to the expected place.
 
-  # Should only be set in test; otherwise the default is what should be used
-  @client Application.compile_env(:honeylixir, :client, Honeylixir.Client)
+  Events have a complicated lifetime from being sent here, possibly sampled out,
+  enqueued, then finally asynchronously sent in a batch. This handles figuring
+  out where it needs to go, sort of like a router and initialy processor for
+  sending events.
+  """
 
-  # Asynchronously sends the given event to Honeycomb. The result is *not*
-  # currently monitored as required by the minimal spec. This should change,
-  # especially as the larger, full-featured spec requires queueing events for
-  # transmission in batches. The implementation there may vary in the future.
-
-  # Sampling is also handled here as per the spec.
-  def send_event(%Honeylixir.Event{sample_rate: 1} = event), do: do_send_event(event)
-
-  def send_event(%Honeylixir.Event{} = event) do
-    case Enum.random(1..event.sample_rate) do
-      1 ->
-        do_send_event(event)
-
-      _ ->
-        {:ok, :sampled}
-    end
-  end
-
-  defp do_send_event(event) do
-    Task.start(fn ->
-      @client.send_event(event)
-    end)
-
-    {:ok, :processed}
+  @doc """
+  Handles sending the batch to a transmission sender task to be processed
+  asynchronously.
+  """
+  @spec send_batch(list(Honeylixir.Event.t())) :: none()
+  def send_batch(events) when is_list(events) do
+    Task.Supervisor.start_child(
+      Honeylixir.TransmissionSupervisor,
+      Honeylixir.TransmissionSender,
+      :send_batch,
+      [events]
+    )
   end
 end
