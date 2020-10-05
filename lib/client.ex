@@ -74,18 +74,36 @@ defmodule Honeylixir.Client do
     end
   end
 
-  # Adds standard headers for all requests that do not vary by data sent.
-  #
-  # ## Examples
-  #
-  #     iex> Honeylixir.Client.process_request_headers([])
-  #     [{"Content-Type", "application/json"}, {"User-Agent", "libhoney-honeylixir/0.3.0"}]
-  #
-  #     iex> Honeylixir.Client.process_request_headers([{"X-Foo", "foo"}])
-  #     [{"Content-Type", "application/json"}, {"User-Agent", "libhoney-honeylixir/0.3.0"}, {"X-Foo", "foo"}]
+  @doc """
+  Adds standard headers for all requests that do not vary by data sent.
+
+  ## Examples
+
+      iex> Honeylixir.Client.process_request_headers([])
+      [
+        {"Content-Type", "application/json"},
+        {"User-Agent", "honeylixir/0.3.0 (https://github.com/lirossarvet/honeylixir)"},
+      ]
+
+      iex> Honeylixir.Client.process_request_headers([{"X-Foo", "foo"}])
+      [
+        {"Content-Type", "application/json"},
+        {"User-Agent", "honeylixir/0.3.0 (https://github.com/lirossarvet/honeylixir)"},
+        {"X-Foo", "foo"}
+      ]
+
+  """
   @impl true
   def process_request_headers(headers) do
-    # TODO: Interpolate the version from what it is
-    [{"Content-Type", "application/json"}, {"User-Agent", "libhoney-honeylixir/0.3.0"} | headers]
+    [
+      {"Content-Type", "application/json"},
+      {"User-Agent", gen_user_agent()}
+      | headers
+    ]
+  end
+
+  def gen_user_agent do
+    project = Honeylixir.MixProject.project()
+    "#{project[:app]}/#{project[:version]} (#{project[:package][:links]["Github"]})"
   end
 end

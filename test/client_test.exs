@@ -2,6 +2,8 @@ defmodule HoneylixirClientTest do
   use ExUnit.Case, async: false
   doctest Honeylixir.Client
 
+  @version Honeylixir.MixProject.project()[:version]
+
   setup do
     bypass = Bypass.open()
     {:ok, bypass: bypass}
@@ -17,7 +19,9 @@ defmodule HoneylixirClientTest do
       assert conn.method == "POST"
       assert conn.request_path == "/1/events/honeylixir-test"
       assert Plug.Conn.get_req_header(conn, "content-type") == ["application/json"]
-      assert Plug.Conn.get_req_header(conn, "user-agent") == ["libhoney-honeylixir/0.3.0"]
+
+      assert Plug.Conn.get_req_header(conn, "user-agent") ==
+               ["honeylixir/#{@version} (https://github.com/lirossarvet/honeylixir)"]
 
       # Event specific headers
       assert Plug.Conn.get_req_header(conn, "x-honeycomb-team") == [event.team_writekey]
@@ -80,7 +84,9 @@ defmodule HoneylixirClientTest do
       assert conn.method == "POST"
       assert conn.request_path == "/1/batch/honeylixir-test"
       assert Plug.Conn.get_req_header(conn, "content-type") == ["application/json"]
-      assert Plug.Conn.get_req_header(conn, "user-agent") == ["libhoney-honeylixir/0.3.0"]
+
+      assert Plug.Conn.get_req_header(conn, "user-agent") ==
+               ["honeylixir/#{@version} (https://github.com/lirossarvet/honeylixir)"]
 
       # Event specific headers
       assert Plug.Conn.get_req_header(conn, "content-encoding") == ["gzip"]
@@ -126,7 +132,7 @@ defmodule HoneylixirClientTest do
   test "process_request_headers/1" do
     assert Honeylixir.Client.process_request_headers([{"foobar", "amazing"}]) == [
              {"Content-Type", "application/json"},
-             {"User-Agent", "libhoney-honeylixir/0.3.0"},
+             {"User-Agent", "honeylixir/#{@version} (https://github.com/lirossarvet/honeylixir)"},
              {"foobar", "amazing"}
            ]
   end
