@@ -9,7 +9,7 @@ defmodule HoneylixirEventTest do
     assert event.sample_rate == 1
     assert event.team_writekey == nil
     assert event.dataset == nil
-    assert event.timestamp == DateTime.to_string(DateTimeFake.utc_now())
+    assert event.timestamp =~ ~r(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)
     assert event.fields == %{"service_name" => "honeylixir-tests"}
 
     old_val = Application.get_env(:honeylixir, :service_name)
@@ -30,7 +30,7 @@ defmodule HoneylixirEventTest do
   end
 
   test "create/1 - timestamp" do
-    timestamp = "2020-09-24 04:45:07.753385Z"
+    timestamp = "2020-09-24T04:45:07.753385Z"
 
     event = Honeylixir.Event.create(timestamp)
 

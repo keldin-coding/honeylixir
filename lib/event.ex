@@ -3,14 +3,14 @@ defmodule Honeylixir.Event do
   Used for managing Events and holding their data. It also has a send function
   that really just kicks off the sending process which happens asynchronously.
   """
-  @moduledoc since: "0.1.0"
+  @moduledoc since: "0.5.0"
 
   # This one is mainly for testing only so we an force a timestamp for comparing
 
   @typedoc """
-  An RFC3339 formatted timestamp
+  An ISO8601 formatted timestamp
 
-  `"2020-09-29 04:36:15Z"`
+  `"2020-09-29T04:36:15.123Z"`
   """
   @type rfc_timestamp :: String.t()
 
@@ -65,7 +65,7 @@ defmodule Honeylixir.Event do
   `Honeylixir.Event`.
 
   ```
-  event = Honeylixir.Event.create("2020-09-29 04:36:15Z")
+  event = Honeylixir.Event.create("2020-09-29T04:36:15Z")
   event = Honeylixir.Event.create(%{"field1" => "value1"})
   ```
   """
@@ -82,7 +82,7 @@ defmodule Honeylixir.Event do
   end
 
   @doc """
-  Accepts both a timestamp in RFC3339 format and a map of key/values to
+  Accepts both a timestamp in ISO8601 format and a map of key/values to
   initialize the Event struct with.
   """
   @doc since: "0.1.0"
@@ -187,7 +187,7 @@ defmodule Honeylixir.Event do
     |> Honeylixir.Event.add(Honeylixir.GlobalFields.fields())
   end
 
-  defp utc_timestamp(), do: DateTime.to_string(datetime_module().utc_now())
+  defp utc_timestamp(), do: DateTime.to_iso8601(datetime_module().utc_now())
 
   defp add_service_name(event) do
     if service_name() != nil do
