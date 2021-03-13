@@ -79,13 +79,16 @@ defmodule Honeylixir.Client do
   # ## Examples
   #
   #     iex> Honeylixir.Client.process_request_headers([])
-  #     [{"Content-Type", "application/json"}, {"User-Agent", "libhoney-honeylixir/0.5.0"}]
+  #     [{"Content-Type", "application/json"}, {"User-Agent", "libhoney-honeylixir/0.6.0-dev"}]
   #
   #     iex> Honeylixir.Client.process_request_headers([{"X-Foo", "foo"}])
-  #     [{"Content-Type", "application/json"}, {"User-Agent", "libhoney-honeylixir/0.5.0"}, {"X-Foo", "foo"}]
+  #     [{"Content-Type", "application/json"}, {"User-Agent", "libhoney-honeylixir/0.6.0-dev"}, {"X-Foo", "foo"}]
   @impl true
   def process_request_headers(headers) do
     # TODO: Interpolate the version from what it is
-    [{"Content-Type", "application/json"}, {"User-Agent", "libhoney-honeylixir/0.5.0"} | headers]
+    [
+      {"Content-Type", "application/json"},
+      {"User-Agent", "libhoney-honeylixir/0.6.0-dev"} | headers
+    ]
   end
 end
