@@ -2,11 +2,12 @@ defmodule Honeylixir.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/lirossarvet/honeylixir"
+  @version "0.6.0-dev"
 
   def project do
     [
       app: :honeylixir,
-      version: "0.6.0-dev",
+      version: @version,
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),

@@ -1,4 +1,5 @@
 defmodule Honeylixir do
+  @version Mix.Project.config()[:version]
   @moduledoc """
   Used to interact with honeycomb.io's API for tracing and other data.
 
@@ -185,4 +186,6 @@ defmodule Honeylixir do
   """
   @spec event_send_telemetry_key() :: list()
   def event_send_telemetry_key, do: [:honeylixir, :event, :send]
+
+  def version(), do: @version
 end
