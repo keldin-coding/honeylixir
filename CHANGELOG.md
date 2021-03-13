@@ -1,3 +1,7 @@
+# 0.5.0 (in progress)
+
+* Confirmed support for Elixir `~> 1.9` [#3](https://github.com/lirossarvet/honeylixir/pull/3)
+
 # 0.4.0
 
 * Cleaned up mix.exs file [#2](https://github.com/lirossarvet/honeylixir/pull/2)
