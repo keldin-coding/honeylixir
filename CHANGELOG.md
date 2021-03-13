@@ -1,6 +1,8 @@
-# 0.5.0 (in progress)
+# 0.5.0
 
 * Confirmed support for Elixir `~> 1.9` [#3](https://github.com/lirossarvet/honeylixir/pull/3)
+* Switch to CircleCI for testing
+* Update timestamps to be ISO8601 UTC
 
 # 0.4.0
 
