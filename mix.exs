@@ -50,8 +50,7 @@ defmodule Honeylixir.MixProject do
       {:telemetry, "~> 0.4"},
       {:ex_doc, "~> 0.22", only: :dev},
       {:credo, "~> 1.4.0", only: [:dev, :test], runtime: false},
-      {:bypass, "~> 2.0.0",
-       git: "https://github.com/josevalim/bypass.git", branch: "jv-latest-cowboy", only: :test}
+      {:bypass, "~> 2.1", only: :test}
     ]
   end
 
