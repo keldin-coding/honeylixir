@@ -1,6 +1,6 @@
 # Honeylixir
 
-[![Build Status](https://travis-ci.org/lirossarvet/honeylixir.svg?branch=main)](https://travis-ci.org/lirossarvet/honeylixir)
+[![CircleCI](https://circleci.com/gh/lirossarvet/honeylixir.svg?style=shield)](https://circleci.com/gh/lirossarvet/honeylixir)
 
 This is intended to be a client for usage in hitting the [Honeycomb.io](https://www.honeycomb.io) APIs for sending events geared toward observability.
 

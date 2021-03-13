@@ -1,0 +1,73 @@
+# Elixir CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-elixir/ for more details
+version: 2.1
+jobs:
+  build_and_test:
+    parameters:
+      elixir_version:
+        type: string
+    docker:
+    # specify the version here
+    - image: cimg/elixir:<< parameters.elixir_version >>
+
+    environment:
+      MIX_ENV: test
+
+    # Specify service dependencies here if necessary
+    # CircleCI maintains a library of pre-built images
+    # documented at https://circleci.com/docs/2.0/circleci-images/
+    # - image: circleci/postgres:9.4
+
+    working_directory: ~/repo
+    steps:
+    - checkout
+
+    - run:
+        name: Setup rebar
+        command:  mix local.rebar --force
+    - run:
+        name: Setup hex
+        command:  mix local.hex --force
+
+    - run:
+        name: Format checking
+        command: mix format --check-formatted
+
+    - restore_cache:  # restores saved mix cache
+      # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+        keys:  # list of cache keys, in decreasing specificity
+        - v1-mix-cache-<< parameters.elixir_version >>-{{ checksum "mix.lock" }}
+        - v1-mix-cache-<< parameters.elixir_version >>
+    - restore_cache:  # restores saved build cache
+        keys:
+        - v1-build-cache-<< parameters.elixir_version >>-{{ checksum "mix.lock" }}
+
+    - run:
+        name: Fetch Dependencies
+        command: mix deps.get
+    - run:
+        name: Compilation
+        command: mix compile
+
+    - save_cache:  # generate and store mix cache
+        key: v1-mix-cache-<< parameters.elixir_version >>-{{ checksum "mix.lock" }}
+        paths: deps
+    - save_cache: # don't forget to save a *build* cache, too
+        key: v1-build-cache-<< parameters.elixir_version >>-{{ checksum "mix.lock" }}
+        paths: _build
+
+    - run:
+        name: Run tests
+        command: mix test
+
+workflows:
+  build_and_test:
+    jobs:
+    - build_and_test:
+        matrix:
+          parameters:
+            elixir_version:
+            - "1.9.4"
+            - "1.10.4"
+            - "1.11.3"

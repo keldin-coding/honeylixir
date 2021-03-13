@@ -49,7 +49,7 @@ defmodule Honeylixir.MixProject do
       {:jason, "~> 1.1"},
       {:telemetry, "~> 0.4"},
       {:ex_doc, "~> 0.22", only: :dev},
-      {:credo, "~> 1.4.0", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.4.0", only: [:dev], runtime: false},
       {:bypass, "~> 2.1", only: :test}
     ]
   end
