@@ -21,7 +21,7 @@ defmodule Honeylixir.MixProject do
   def application do
     [
       mod: {Honeylixir, []},
-      extra_applications: [],
+      extra_applications: [:logger],
       env: []
     ]
   end
