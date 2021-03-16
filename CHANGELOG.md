@@ -1,5 +1,9 @@
 # 0.6.0 (in progress)
 
+# 0.5.1
+
+* Add `:logger` as a required extra application
+
 # 0.5.0
 
 * Confirmed support for Elixir `~> 1.9` [#3](https://github.com/lirossarvet/honeylixir/pull/3)
