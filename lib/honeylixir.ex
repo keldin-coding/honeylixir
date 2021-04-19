@@ -23,7 +23,8 @@ defmodule Honeylixir do
   |Name|Type|Description|Default|
   |---|---|---|---|
   |`:api_host`|`string`|API to send events to|https://api.honeycomb.io|
-  |`:sample_rate`|`integer`|Rate at which events will be sampled represented as a percented. e.g., use 10 to send 10% of events|1|
+  |`:sample_rate`|`integer`|Default rate at which events will be sampled represented as a percented. e.g., use 10 to send 10% of events|1|
+  |`:sample_hook`|function/2|Arity 2 function accepting the sample rate originally on the event and all fields at the time of sending as the second|N/A|
   |`:team_writekey`|`string`|API key used to send events|`nil`|
   |`:dataset`|`string`/`atom`|Dataset to send the events to|`nil`|
   |`:service_name`|`string`/`atom`|Name of your service which will be added as a field on all events at the key `"service_name"`|`nil`|
@@ -86,6 +87,24 @@ defmodule Honeylixir do
   Honeylixir.GlobalFields.remove_field("my-thing")
   IO.inspect Honeylixir.GlobalFields.fields
   # => %{}
+  ```
+
+  ### Configuring Sampling
+
+  You can configure a `sample_hook` that is invoked when an event is sent. This is called first to determine if the
+  event will actually be sent to Honeycomb. The expected way to use this is to pass a function using `&Module.function/2`
+  syntax. If you are using pattern matching in your sample hook and aren't covering all cases on your own, you can set
+  the catch-all sample hook to call the `default_sample_hook` in this package.
+
+  ```
+  defmodule MyApp.HoneycombSampling do
+    def sample(original_rate, %{"user_id" => user_id}) do
+      {Honeylixir.DeterinsticSampler.should_sample?(original_rate, user_id), original_rate}
+    end
+    def sample(original_rate, fields), do: Honeylixir.default_sample_hook(original_rate, fields)
+  end
+
+  config :honeylixir, sample_hook: &MyApp.HoneycombSampling.sample/2
   ```
 
   ### Builder pattern
@@ -188,4 +207,12 @@ defmodule Honeylixir do
   def event_send_telemetry_key, do: [:honeylixir, :event, :send]
 
   def version(), do: @version
+
+  def sample_hook() do
+    Application.get_env(:honeylixir, :sample_hook, &default_sample_hook/2)
+  end
+
+  def default_sample_hook(rate, _) do
+    {Honeylixir.DeterminsticSampler.should_sample?(rate, generate_short_id()), rate}
+  end
 end

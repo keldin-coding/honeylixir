@@ -76,33 +76,49 @@ defmodule HoneylixirEventTest do
   end
 
   test "send/1" do
-    event = Honeylixir.Event.create()
+    # Setup a sampler so we can guarantee sampling for tests, which is fair for
+    # real life too
+    sampler = fn rate, fields ->
+      {Honeylixir.DeterminsticSampler.should_sample?(rate, fields["value"]), rate}
+    end
 
-    # Default sample rate of 1
-    assert Honeylixir.Event.send(event) == :ok
+    Application.put_env(:honeylixir, :sample_hook, sampler)
 
-    :rand.seed(:exsss, {123, 456, 789})
-    event = %{event | sample_rate: 2, metadata: %{id: "test-send/1"}}
+    # Start up an Agent that sits and accepts data for the responses to test against.
+    {:ok, _pid} = start_supervised(HoneylixirTestListener)
 
-    # The ordering here is important and relies on the seed setting above
-    #
-    # random/1 returns 2
     :telemetry.attach(
       "event_test.send/1",
       [:honeylixir, :event, :send],
-      fn _, _, %{response: response}, _ ->
-        if response.metadata == %{id: "test-send/1"} do
-          assert response.err == :sampled
-        end
+      fn _, _, %{response: %Honeylixir.Response{metadata: metadata, err: err}}, _ ->
+        HoneylixirTestListener.seen(metadata[:id], err)
       end,
       nil
     )
 
+    # Default sample rate of 1
+    event =
+      Honeylixir.Event.create(%{"value" => "cool"})
+      |> Honeylixir.Event.add_metadata(%{id: "not-sampled"})
+
     assert Honeylixir.Event.send(event) == :ok
 
-    :telemetry.detach("event_test.send/1")
+    event = %{event | sample_rate: 2, metadata: %{id: "test-send/1"}}
+    assert Honeylixir.Event.send(event) == :ok
 
-    # random/1 returns 1
-    assert Honeylixir.Event.send(Honeylixir.Event.create()) == :ok
+    # Force them to send
+    Honeylixir.TransmissionQueue.process_batch(Honeylixir.TransmissionQueue.queue_key(event))
+    # Do I hate this? yes. Could I probably find a way to make this better? Also yes.
+    # For now, though, this at least helps us actually test things flowing and
+    # sample hooks and everything entailed. This is KIND of an integration test and
+    # probably says something about the architecture here that event testing is so
+    # entangled with so much asynchronous processing. 
+    :timer.sleep(1000)
+
+    assert HoneylixirTestListener.values() == %{"not-sampled" => nil, "test-send/1" => :sampled}
+
+    # Quick teardown
+    :telemetry.detach("event_test.send/1")
+    Application.delete_env(:honeylixir, :sample_hook)
   end
 end

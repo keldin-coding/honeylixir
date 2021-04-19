@@ -155,23 +155,22 @@ defmodule Honeylixir.Event do
   immediately.
   """
   @spec send(t()) :: :ok
-  def send(%Honeylixir.Event{sample_rate: 1} = event),
-    do: Honeylixir.TransmissionQueue.enqueue_event(event)
+  def send(%Honeylixir.Event{fields: fields, sample_rate: sample_rate} = event) do
+    {to_send, rate} = Honeylixir.sample_hook().(sample_rate, fields)
 
-  def send(%Honeylixir.Event{} = event) do
-    case Enum.random(1..event.sample_rate) do
-      1 ->
-        Honeylixir.TransmissionQueue.enqueue_event(event)
-        :ok
+    event = %{event | sample_rate: rate}
 
-      _ ->
-        :telemetry.execute(
-          Honeylixir.event_send_telemetry_key(),
-          %{},
-          %{response: Honeylixir.Response.sampled_response(event)}
-        )
+    if to_send do
+      Honeylixir.TransmissionQueue.enqueue_event(event)
+      :ok
+    else
+      :telemetry.execute(
+        Honeylixir.event_send_telemetry_key(),
+        %{},
+        %{response: Honeylixir.Response.sampled_response(event)}
+      )
 
-        :ok
+      :ok
     end
   end
 

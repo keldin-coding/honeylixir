@@ -2,6 +2,7 @@ defmodule Honeylixir.TransmissionQueue do
   @moduledoc """
   Queue for processing and managing events to be sent.
   """
+
   use GenServer
 
   require Logger
@@ -12,16 +13,6 @@ defmodule Honeylixir.TransmissionQueue do
   defstruct @enforce_fields
 
   @type t_queue_key :: {String.t(), String.t(), String.t()}
-
-  # Helpers
-
-  # Creates the key for our queues in the state based on the given event.
-
-  # The Honeycomb sdk spec requires grouping events into batches based on api host,
-  # dataset, and writekey.
-  defp queue_key(%Honeylixir.Event{} = event) do
-    {event.api_host, event.team_writekey, event.dataset}
-  end
 
   # Client-side
 
@@ -118,7 +109,7 @@ defmodule Honeylixir.TransmissionQueue do
         %{batch_size: batch_size} = state
       ) do
     # Using `nil` for items might be dangerous here, but it's entirely unused. We
-    # exit ahead of every accessing items so we may as well save the minor memory
+    # exit ahead of ever accessing items so we may as well save the minor memory
     # and time cost.
     queue_for_batch =
       Map.get(state, queue_key, %Honeylixir.TransmissionQueue{size: 0, items: nil})
@@ -126,20 +117,6 @@ defmodule Honeylixir.TransmissionQueue do
     current_batch_size = Enum.min([queue_for_batch.size, batch_size])
 
     _handle_process_batch(state, queue_for_batch, queue_key, current_batch_size)
-  end
-
-  @impl true
-  def handle_info(:process_all_batches, %{batch_timing: batch_timing} = state) do
-    keys =
-      Enum.reduce(@internal_fields, Map.keys(state), fn i, acc ->
-        List.delete(acc, i)
-      end)
-
-    Enum.each(keys, &process_batch(&1))
-
-    Process.send_after(self(), :process_all_batches, batch_timing)
-
-    {:noreply, state}
   end
 
   defp _handle_process_batch(state, _, _, current_batch_size) when current_batch_size == 0,
@@ -151,6 +128,14 @@ defmodule Honeylixir.TransmissionQueue do
          {_api_host, _team_writekey, _dataset} = queue_key,
          current_batch_size
        ) do
+    # This is one of my least favorite things. :queue doesn't provide a way that
+    # I could find for getting X number of items from it, so we resort to iterating
+    # through current_batch_size times. In the worst case (1 item), this wastes
+    # time. In any other case, it gets progressively less useless until there are
+    # more events than a batch allows at which point it's totally fine.
+    #
+    # It's entirely possible using a regular list would be better here, but adding
+    # things to the head is efficient there which we don't want.
     {batch, remaining_items} =
       Enum.reduce(
         1..current_batch_size,
@@ -193,5 +178,31 @@ defmodule Honeylixir.TransmissionQueue do
       _ ->
         {:noreply, state}
     end
+  end
+
+  @impl true
+  def handle_info(:process_all_batches, %{batch_timing: batch_timing} = state) do
+    # Our state consists of 3 + N things: everything in @internal_fields and then
+    # any queue keys.
+    keys =
+      Enum.reduce(@internal_fields, Map.keys(state), fn i, acc ->
+        List.delete(acc, i)
+      end)
+
+    Enum.each(keys, &process_batch(&1))
+
+    Process.send_after(self(), :process_all_batches, batch_timing)
+
+    {:noreply, state}
+  end
+
+  # Helpers
+
+  # Creates the key for our queues in the state based on the given event.
+
+  # The Honeycomb sdk spec requires grouping events into batches based on api host,
+  # dataset, and writekey.
+  def queue_key(%Honeylixir.Event{} = event) do
+    {event.api_host, event.team_writekey, event.dataset}
   end
 end

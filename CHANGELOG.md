@@ -1,5 +1,9 @@
 # 0.6.0 (in progress)
 
+* Add `Honeylixir.DeterministicSampler` with a function to sampled based on a field
+* Add support for a `sample_hook` that users can provide
+* Update HTTPoison dependency because of some SSL warnings
+
 # 0.5.1
 
 * Add `:logger` as a required extra application

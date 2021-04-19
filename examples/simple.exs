@@ -10,5 +10,6 @@ Enum.each(501..1000, fn i ->
 end)
 
 # We sleep because currently there are no trappings to ensure events are sent
-# on program exit. The desired behavior there is still in question.
+# on program exit. The desired behavior there is still in question but should
+# probably trap and then flush the queue, or at least try to as quickly as possible.
 :timer.sleep(800)

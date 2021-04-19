@@ -46,7 +46,7 @@ defmodule Honeylixir.MixProject do
 
   defp deps do
     [
-      {:httpoison, "~> 1.5"},
+      {:httpoison, "~> 1.8"},
       {:jason, "~> 1.1"},
       {:telemetry, "~> 0.4"},
       {:ex_doc, "~> 0.22", only: :dev},
