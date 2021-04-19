@@ -59,7 +59,7 @@ jobs:
 
     - run:
         name: Run tests
-        command: mix test
+        command: mix test --exclude flaky
 
 workflows:
   build_and_test:

@@ -75,6 +75,7 @@ defmodule HoneylixirEventTest do
     assert event.fields["foobar"] == "amazing"
   end
 
+  @tag :flaky
   test "send/1" do
     # Setup a sampler so we can guarantee sampling for tests, which is fair for
     # real life too
@@ -112,7 +113,7 @@ defmodule HoneylixirEventTest do
     # For now, though, this at least helps us actually test things flowing and
     # sample hooks and everything entailed. This is KIND of an integration test and
     # probably says something about the architecture here that event testing is so
-    # entangled with so much asynchronous processing. 
+    # entangled with so much asynchronous processing.
     :timer.sleep(1000)
 
     assert HoneylixirTestListener.values() == %{"not-sampled" => nil, "test-send/1" => :sampled}
