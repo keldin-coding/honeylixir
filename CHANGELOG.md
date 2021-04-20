@@ -1,8 +1,9 @@
-# 0.6.0 (in progress)
+# 0.6.0
 
+* **IMPORTANT**: Update HTTPoison dependency because of some SSL warnings
 * Add `Honeylixir.DeterministicSampler` with a function to sampled based on a field
 * Add support for a `sample_hook` that users can provide
-* Update HTTPoison dependency because of some SSL warnings
+* Re-organize files to have a `honeylixir` directory to match module naming
 
 # 0.5.1
 

@@ -11,7 +11,7 @@ Available via HEx, the package can be installed by adding `honeylixir` to your l
 ```elixir
 def deps do
   [
-    {:honeylixir, "~> 0.5.0"}
+    {:honeylixir, "~> 0.6.0"}
   ]
 end
 ```
