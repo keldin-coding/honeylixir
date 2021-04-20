@@ -3,7 +3,7 @@ defmodule Honeylixir.TransmissionSender do
 
   @moduledoc """
   Typically invoked as a Task, handles sending the `Honeylixir.Event` batches to
-  the `Honeylixir.Client` and adding responses to the queue.
+  the `Honeylixir.Client` and reporting responses from Honeycomb.
   """
 
   @doc """

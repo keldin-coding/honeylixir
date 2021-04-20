@@ -15,6 +15,12 @@ defmodule Honeylixir.Event do
   @type rfc_timestamp :: String.t()
 
   @typedoc """
+  Storage of the fields for an event. These are stored with String keys pointing
+  to any kind of field so long as it implements the `Jason.Encoder` protocol.
+  """
+  @type fields_map :: %{String.t() => Jason.Encoder.t()}
+
+  @typedoc """
   A struct containing all the data of an event.
 
   By default, an event is constructed with the values in the configuration defined
@@ -32,7 +38,7 @@ defmodule Honeylixir.Event do
   @type t :: %__MODULE__{
           api_host: String.t(),
           dataset: String.t() | atom(),
-          fields: map(),
+          fields: fields_map(),
           metadata: map(),
           sample_rate: integer(),
           team_writekey: String.t(),
@@ -70,7 +76,7 @@ defmodule Honeylixir.Event do
   ```
   """
   @doc since: "0.1.0"
-  @spec create(rfc_timestamp() | map()) :: t()
+  @spec create(rfc_timestamp() | fields_map()) :: t()
   def create(fields_or_timestamp)
 
   def create(%{} = fields) do
@@ -86,7 +92,7 @@ defmodule Honeylixir.Event do
   initialize the Event struct with.
   """
   @doc since: "0.1.0"
-  @spec create(rfc_timestamp(), map()) :: t()
+  @spec create(rfc_timestamp(), fields_map()) :: t()
   def create(timestamp, %{} = fields) when is_binary(timestamp) do
     event = %{create() | timestamp: timestamp}
 
@@ -104,7 +110,7 @@ defmodule Honeylixir.Event do
 
   """
   @doc since: "0.1.0"
-  @spec add_field(t(), String.t(), any()) :: t()
+  @spec add_field(t(), String.t(), Jason.Encoder.t()) :: t()
   def add_field(%Honeylixir.Event{} = event, field, value) when is_binary(field) do
     new_fields = Map.put(event.fields, field, value)
 
@@ -120,7 +126,7 @@ defmodule Honeylixir.Event do
       iex> Honeylixir.Event.add(event, %{"another" => "field", "service_name" => "foobar"}).fields
       %{"service_name" => "foobar", "another" => "field"}
   """
-  @spec add(Honeylixir.Event.t(), map()) :: t()
+  @spec add(Honeylixir.Event.t(), fields_map()) :: t()
   def add(%Honeylixir.Event{} = event, %{} = fieldset) do
     Enum.reduce(fieldset, event, fn {k, v}, acc_event ->
       add_field(acc_event, k, v)

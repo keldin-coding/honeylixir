@@ -5,7 +5,6 @@ defmodule Honeylixir do
 
   ## Installation
 
-
   Adding Honeylixir to your mix.exs as a dependency should suffice for installation:
 
   ```
@@ -66,8 +65,9 @@ defmodule Honeylixir do
     |> Honeylixir.Event.send()
   ```
 
-  Any value can be used but fields are **REQUIRED** to be strings. Non-string fields
-  will result in a no matching function clause error.
+  Any value that dervices the `Jason.Encoder` protocol can be used, but fields are
+  **REQUIRED** to be strings. Non-string fields will result in a no matching function
+  clause error.
 
   ### Global field configuration
 
@@ -162,6 +162,15 @@ defmodule Honeylixir do
   ```
   """
 
+  @typedoc """
+  Function signature required of the function passed as a sample_hook. It takes in
+  the sample rate as it is set on the event in question as well as all the fields
+  that would be sent. The return value should be a tuple of a boolean and integer.
+  The boolean indicates if the event should, in fact, be sent to Honeycomb. The
+  integer is the sample rate as should be reported to Honeycomb for extrapolation.
+  """
+  @type sample_function :: (integer(), Honeylixir.Event.fields_map() -> {boolean(), integer()})
+
   use Application
 
   @doc false
@@ -206,13 +215,19 @@ defmodule Honeylixir do
   @spec event_send_telemetry_key() :: list()
   def event_send_telemetry_key, do: [:honeylixir, :event, :send]
 
-  def version(), do: @version
-
-  def sample_hook() do
-    Application.get_env(:honeylixir, :sample_hook, &default_sample_hook/2)
-  end
-
+  @doc """
+  Randomly samples your events according to the rate given by generating a random
+  ID for your event which is then used to determine sampling.
+  """
   def default_sample_hook(rate, _) do
     {Honeylixir.DeterminsticSampler.should_sample?(rate, generate_short_id()), rate}
+  end
+
+  @doc false
+  def version(), do: @version
+
+  @doc false
+  def sample_hook() do
+    Application.get_env(:honeylixir, :sample_hook, &default_sample_hook/2)
   end
 end
