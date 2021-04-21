@@ -167,7 +167,7 @@ defmodule Honeylixir.Event do
     event = %{event | sample_rate: rate}
 
     if to_send do
-      Honeylixir.TransmissionQueue.enqueue_event(event)
+      transmission_queue().enqueue_event(event)
       :ok
     else
       :telemetry.execute(
@@ -225,5 +225,9 @@ defmodule Honeylixir.Event do
 
   defp service_name do
     Application.get_env(:honeylixir, :service_name)
+  end
+
+  defp transmission_queue do
+    Application.get_env(:honeylixir, :transmission_queue, Honeylixir.TransmissionQueue)
   end
 end

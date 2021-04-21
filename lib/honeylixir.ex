@@ -1,7 +1,7 @@
 defmodule Honeylixir do
   @version Mix.Project.config()[:version]
   @moduledoc """
-  Used to interact with honeycomb.io's API for tracing and other data.
+  Used to interact with Honeycomb's API for sending events.
 
   ## Installation
 
