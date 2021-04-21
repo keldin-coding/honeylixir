@@ -1,3 +1,7 @@
+# 0.6.1
+
+* Small internal update to make Event sending a little more testable for other libraries especially
+
 # 0.6.0
 
 * **IMPORTANT**: Update HTTPoison dependency because of some SSL warnings
