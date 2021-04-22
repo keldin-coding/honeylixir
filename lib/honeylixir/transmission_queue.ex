@@ -1,7 +1,7 @@
 defmodule Honeylixir.TransmissionQueue do
-  @moduledoc """
-  Queue for processing and managing events to be sent.
-  """
+  @moduledoc false
+
+  # Queue for processing and managing events to be sent.
 
   use GenServer
 

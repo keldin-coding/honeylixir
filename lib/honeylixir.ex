@@ -10,7 +10,7 @@ defmodule Honeylixir do
   ```
   def deps() do
     [
-      {:honeylixir, "~> 0.5.0"}
+      {:honeylixir, "~> 0.7.0"}
     ]
   end
   ```
@@ -62,6 +62,7 @@ defmodule Honeylixir do
   Honeylixir.Event.create()
     |> Honeylixir.Event.add_field("a_field", "my_value")
     |> Honeylixir.Event.add_field("something-else", %{"nested" => "value"})
+    |> Honeylixir.Event.add(%{"field 4" => 4, "field 5" => :ok})
     |> Honeylixir.Event.send()
   ```
 
