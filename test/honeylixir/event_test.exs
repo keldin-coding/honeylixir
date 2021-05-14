@@ -70,7 +70,7 @@ defmodule HoneylixirEventTest do
   test "add/2" do
     event =
       Honeylixir.Event.create()
-      |> Honeylixir.Event.add(%{"foobar" => "amazing"})
+      |> Honeylixir.Event.add(%{foobar: "amazing"})
 
     assert event.fields["foobar"] == "amazing"
   end

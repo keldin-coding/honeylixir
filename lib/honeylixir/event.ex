@@ -18,7 +18,7 @@ defmodule Honeylixir.Event do
   Storage of the fields for an event. These are stored with String keys pointing
   to any kind of field so long as it implements the `Jason.Encoder` protocol.
   """
-  @type fields_map :: %{String.t() => Jason.Encoder.t()}
+  @type fields_map :: %{(String.t() | atom()) => Jason.Encoder.t()}
 
   @typedoc """
   A struct containing all the data of an event.
@@ -110,9 +110,10 @@ defmodule Honeylixir.Event do
 
   """
   @doc since: "0.1.0"
-  @spec add_field(t(), String.t(), Jason.Encoder.t()) :: t()
-  def add_field(%Honeylixir.Event{} = event, field, value) when is_binary(field) do
-    new_fields = Map.put(event.fields, field, value)
+  @spec add_field(t(), String.t() | atom(), Jason.Encoder.t()) :: t()
+  def add_field(%Honeylixir.Event{} = event, field, value)
+      when is_binary(field) or is_atom(field) do
+    new_fields = Map.put(event.fields, to_string(field), value)
 
     %{event | fields: new_fields}
   end

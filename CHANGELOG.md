@@ -1,3 +1,8 @@
+# 0.7.0
+
+* Allow atoms to be used as field keys, converting them to Strings to avoid confusing
+the same key being set twice and what value would be sent.
+
 # 0.6.1
 
 * Small internal update to make Event sending a little more testable for other libraries especially
