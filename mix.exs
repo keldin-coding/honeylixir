@@ -2,7 +2,7 @@ defmodule Honeylixir.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/lirossarvet/honeylixir"
-  @version "0.8.0"
+  @version "0.8.1"
 
   def project do
     [
@@ -48,7 +48,7 @@ defmodule Honeylixir.MixProject do
     [
       {:httpoison, "~> 1.8"},
       {:jason, "~> 1.1"},
-      {:telemetry, "~> 0.4.0"},
+      {:telemetry, ">= 0.4.0"},
       {:ex_doc, "~> 0.22", only: :dev},
       {:credo, "~> 1.4.0", only: [:dev], runtime: false},
       {:bypass, "~> 2.1", only: :test}

@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.8.0 (in progress)
+## 0.8.1
+
+* Actually relax the telemetry version requirement
+
+## 0.8.0
 
 * Relax Telemetry version requirement
 

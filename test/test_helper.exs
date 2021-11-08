@@ -2,6 +2,8 @@ defmodule DateTimeFake do
   def utc_now(), do: ~U[2020-09-24 04:15:19.345808Z]
 end
 
+Logger.configure([level: :warning])
+
 defmodule HoneylixirTestListener do
   @moduledoc """
   Small `Agent` used to store and retrieve fields to be added to all events.
