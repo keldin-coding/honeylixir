@@ -2,6 +2,8 @@
 
 ## 0.8.0 (in progress)
 
+* Relax Telemetry version requirement
+
 ## 0.7.0
 
 * Allow atoms to be used as field keys, converting them to Strings to avoid confusing
